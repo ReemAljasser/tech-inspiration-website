@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tech-Inspire | تسجيل الدخول</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  
+  <header class="top-nav">
+    <img src="./src/assets/images/logo.png" alt="شعار">
+    <nav>
+      <ul>         
+        <li><a href="contact.html">تواصل معنا</a></li>
+        <li><a href="camp.html">المعسكرات</a></li>
+        <li><a href="Lectures.html">المحاضرات</a></li>
+        <li><a href="ProfessionalCertificates.html">الشهادات الاحترافية</a></li>
+        <li v-if="!isLoggedIn"><a href="login.html">تسجيل الدخول</a></li>
+        <li v-if="!isLoggedIn"><a href="signup.html">إنشاء حساب</a></li>
+        <li><a href="index.html">الرئيسية</a></li>
+
+      </ul>
+    </nav>
+  </header>
+
+</head>
+<body>
+  <div id="app">
+    
+    <div class="container">
+      <div class="card">
+        <h2 style="text-align:center;">تسجيل الدخول</h2>
+        <input type="email" v-model="email" placeholder="البريد الإلكتروني" />
+        <input type="password" v-model="password" placeholder="كلمة المرور" />
+        <button @click="login">تسجيل الدخول</button>
+        <div class="error" v-if="error">{{ error }}</div>
+         <!-- رابط "نسيت كلمة المرور" -->  
+         <div style="text-align: center; margin-top: 10px;">  
+          <a href="#" @click.prevent="showResetPasswordForm = true">نسيت كلمة المرور؟</a>  
+        </div>  
+
+        <!-- نموذج إعادة تعيين كلمة المرور -->  
+        <div v-if="showResetPasswordForm" style="margin-top: 20px;">  
+          <h3>إعادة تعيين كلمة المرور</h3>  
+          <input type="email" v-model="resetEmail" placeholder="قم بإدخال بريدك الإلكتروني" />  
+          <button @click="resetPassword">إعادة تعيين كلمة المرور</button>  
+          <div class="error" v-if="error">{{ error }}</div>  
+          <button @click="showResetPasswordForm = false" style="background: red;">إغلاق</button> <!-- زر إغلاق النموذج -->  
+        </div>  
+      </div>  
+      </div>
+    </div>
+  </div>
+  <script type="module">
+    import { createApp, ref, onMounted } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+    import { auth } from './firebaseConfig.js';
+    import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
+    import { sendPasswordResetEmail } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';  
+
+
+    createApp({  
+      setup() {  
+        const email = ref('');  
+        const password = ref('');  
+        const error = ref('');  
+        const isLoggedIn = ref(false);  
+        const showResetPasswordForm = ref(false);  
+        const resetEmail = ref('');  
+
+        const login = async () => {  
+          error.value = '';  
+
+          if (!email.value || !password.value) {  
+            error.value = 'يرجى إدخال البريد وكلمة المرور.';  
+            return;  
+          }  
+
+          try {  
+            await signInWithEmailAndPassword(auth, email.value, password.value);  
+            alert('تم تسجيل الدخول بنجاح!');  
+            window.location.href = 'profile.html';  
+          } catch (e) {  
+            if (e.code === 'auth/user-not-found' || e.code === 'auth/wrong-password') {  
+              error.value = 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';  
+            } else {  
+              error.value = 'حدث خطأ: ' + e.message;  
+            }  
+          }  
+        };  
+
+        const logout = async () => {  
+          await signOut(auth);  
+          window.location.reload();  
+        };  
+
+        const resetPassword = async () => {  
+          error.value = '';  
+
+          if (!resetEmail.value) {  
+            error.value = 'يرجى إدخال بريدك الإلكتروني لإعادة تعيين كلمة المرور.';  
+            return;  
+          }  
+
+          try {  
+            await sendPasswordResetEmail(auth, resetEmail.value);  
+            alert('يرجى التحقق من بريدك الإلكتروني لإعادة تعيين كلمة المرور.');  
+            showResetPasswordForm.value = false; // إغلاق النموذج بعد النجاح  
+          } catch (e) {  
+            error.value = 'حدث خطأ: ' + e.message;  
+          }  
+        };  
+
+        onMounted(() => {  
+          onAuthStateChanged(auth, user => {  
+            isLoggedIn.value = !!user;  
+          });  
+        });  
+
+        return { email, password, error, login, isLoggedIn, logout, showResetPasswordForm, resetEmail, resetPassword };  
+      }  
+    }).mount('#app')
+  </script>
+  <footer>
+    <p>جميع الحقوق محفوظة © 2025 Tech-Inspire</p>
+</footer>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
+
+  body {
+    font-family: 'Tajawal', sans-serif;
+    margin: 0;
+    background: #f9f9f9;
+  }
+
+  .top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, #4a0b72, #2f0e54);
+    padding: 10px;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+  }
+
+  .top-nav img {
+    height: 120px;
+    width: 120px;
+  }
+
+  .top-nav nav ul {
+    list-style: none;
+    display: flex;
+    gap: 15px;
+    margin: 0;
+    padding: 0;
+  }
+
+  .top-nav nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s;
+  }
+
+  .top-nav nav ul li a:hover {
+    color: #f39c12;
+  }
+
+  .container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding-top: 120px;
+  }
+
+  .card {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: right;
+  }
+
+  input, button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 5px;
+    font-family: inherit;
+  }
+
+  input {
+    border: 1px solid #ccc;
+  }
+
+  button {
+    border: none;
+    background: linear-gradient(135deg, #4a0b72, #2f0e54);
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: #f39c12;
+  }
+
+  .error {
+    color: red;
+    text-align: center;
+    margin-top: 10px;
+  }
+  a{
+    justify-content: space-between;
+    display: flex;
+    color:#4a0b72 ;
+  }
+  h3{
+    padding-right: 130px;
+    padding-left: 130px;
+    text-align: center;
+  }
+  footer {  
+  text-align: center;  
+  padding: 20px;  
+  background-color: #4a0b72;
+  color: #ffffff;  
+}
+
+</style>
+</body>
+</html>

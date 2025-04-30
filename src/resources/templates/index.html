@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech-Inspire | محاضرات ومعسكرات التقنية</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" /> 
+    <link rel="stylesheet" href="/leaflet-groupedlayercontrol/leaflet.groupedlayercontrol.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.groupedlayercontrol/0.6.1/leaflet.groupedlayercontrol.min.css" />
+
+    <!-- Leaflet Routing Machine CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css"/>
+  
+    <header class="top-nav">
+    <img src="./src/assets/images/logo.png" alt="">
+      <nav>
+          <ul>
+              <li><a href="contact.html"><i class="fas fa-envelope"></i> تواصل معنا</a></li>
+              <li><a href="ProfessionalCertificates.html"><i class="fas fa-envelope"></i> الشهادات الاحترافية</a></li>
+              <li><a href="Lectures.html"><i class="fas fa-chalkboard-teacher"></i> المحاضرات</a></li>
+              <li><a href="camp.html"><i class="fas fa-campground"></i> المعسكرات</a></li>
+              <li><a href="about.html"><i class="fas fa-campground"></i> من نحن</a></li>
+              <li><a href="index.html"><i class="fas fa-home"></i> الرئيسية</a></li>
+          </ul>
+      </nav>
+  </header>
+  
+</head>
+
+<body>
+      <!-- إدخال الإحداثيات من قبل المستخدم -->
+      <div class="coordinates-input">
+        <label for="latitude">خط العرض:</label>
+        <input type="number" id="latitude" v-model="userCoordinates.latitude" placeholder="مثال: 24.7136">
+  
+        <label for="longitude">خط الطول:</label>
+        <input type="number" id="longitude" v-model="userCoordinates.longitude" placeholder="مثال: 46.6753">
+  
+        <button @click="addUserMarker">إضافة دبوس</button>
+      </div>
+    <div id="app">
+        <header>
+            <h1>Tech-Inspire</h1>
+            <p>اكتشف أحدث المحاضرات والمعسكرات التقنية في الرياض</p>
+        </header>
+
+        <div id="map-container">
+            <MapComponent />
+        </div>
+
+    </div>
+    <!-- Leaflet Routing Machine JS -->
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="src/App.vue"></script>
+    <script src="src/components/MapView.vue"></script>
+    <script src="./app.vue"></script>
+    <script src="assets/leaflet-groupedlayercontrol/leaflet.groupedlayercontrol.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.groupedlayercontrol/0.6.1/leaflet.groupedlayercontrol.min.js"></script>
+
+
+    <footer>
+            <p>جميع الحقوق محفوظة © 2025 Tech-Inspire</p>
+    </footer>
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Tajawal:wght@400;700&display=swap');
+    .top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, #4a0b72, #2f0e54);
+    padding: 10px 10px;
+    box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.2);
+    font-family: 'Tajawal', sans-serif;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+}
+
+.top-nav img {
+    height: 120px;
+    width: 120px;
+}
+
+.top-nav nav ul {
+    list-style: none;
+    display: flex;
+    gap: 15px;
+    margin: 0;
+    padding: 0;
+}
+
+.top-nav nav ul li {
+    display: inline-block;
+}
+
+.top-nav nav ul li a {
+    text-decoration: none;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.top-nav nav ul li a i {
+    font-size: 20px;
+    margin-bottom: 3px;
+}
+
+.top-nav nav ul li a:hover {
+    color: #f39c12;
+    transform: scale(1.1);
+}
+.h1{
+  top: 20px;
+  line-height: 20%;
+}
+.i{
+  margin-left: 50px;
+}
+p{
+      display: block;
+    }
+footer {  
+    text-align: center;  
+    padding: 20px;  
+    background-color: #7a28ad;
+    color: #ffffff;  
+}
+body {
+      margin: 0;
+      font-family: 'Tajawal', sans-serif;
+    }
+    /* تنسيق المدخلات */
+.coordinates-input {
+
+  text-align: center;
+  direction: rtl;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* هذا يخلي العناصر تكون بالنص أفقيًا */
+  justify-content: center; /* مفيد لو كانت داخل كونتينر أكبر */
+}
+
+.coordinates-input input {
+  padding: 8px;
+  margin: 10px 0;
+  border-radius: 5px;
+  border: none;
+  width: 200px;
+}
+
+.coordinates-input button {
+  padding: 8px 15px;
+  background-color: #531e8d;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.coordinates-input button:hover {
+  background-color: #735bac;
+}  
+
+  </style>        
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tech-Inspire | التسجيل</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script type="module">
+    import { createApp, ref } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+    import { auth, db } from './firebaseConfig.js';
+    import { createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
+    import { setDoc, doc } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+    export default {
+  data() {
+    return {
+      selectedInterests: [], // هذي اللي بنرسلها
+      allInterests: ['برمجة', 'ذكاء اصطناعي', 'أمن سيبراني', 'تحليل بيانات','تصميم','artificial intelligence','machine learning course','Science & Technology','Master/Certification','Master/Science']
+    };
+  }
+};
+    createApp({
+      setup() {
+        const email = ref('');
+        const name = ref('');
+        const password = ref('');
+        const confirmPassword = ref('');
+        const interests = ref([]);
+        const error = ref('');
+
+        const signup = async () => {
+          error.value = '';
+
+          if (!email.value || !password.value || !confirmPassword.value ||!name.value ) {
+            error.value = 'يرجى ملء جميع الحقول.';
+            return;
+          }
+
+          if (password.value !== confirmPassword.value) {
+            error.value = 'كلمة المرور وتأكيدها غير متطابقتين.';
+            return;
+          }
+
+          if (password.value.length < 6) {
+            error.value = 'كلمة المرور يجب أن تكون 6 أحرف على الأقل.';
+            return;
+          }
+
+          try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
+            const user = userCredential.user;
+
+            await setDoc(doc(db, 'users', user.uid), {
+              name: name.value,
+              email: email.value,
+              interests: interests.value.length > 0 ? interests.value : [],  // تأكد أن المصفوفة ليست فارغة  
+              createdAt: new Date()
+            });
+
+            alert('تم إنشاء الحساب بنجاح!');
+            window.location.href = 'login.html';
+          } catch (e) {
+            if (e.code === 'auth/email-already-in-use') {
+              error.value = 'البريد الإلكتروني مستخدم بالفعل.';
+            } else if (e.code === 'auth/invalid-email') {
+              error.value = 'البريد الإلكتروني غير صالح.';
+            } else if (e.code === 'auth/weak-password') {
+              error.value = 'كلمة المرور ضعيفة.';
+            } else {
+              error.value = 'حدث خطأ: ' + e.message;
+            }
+          }
+        };
+
+        return { email, password, confirmPassword,name,interests, error, signup };
+      }
+    }).mount('#app');
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
+
+    body {
+      font-family: 'Tajawal', sans-serif;
+      margin: 0;
+      background: #f9f9f9;
+    }
+
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(135deg, #4a0b72, #2f0e54);
+      padding: 10px 10px;
+      box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.2);
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .top-nav img {
+      height: 120px;
+      width: 120px;
+    }
+
+    .top-nav nav ul {
+      list-style: none;
+      display: flex;
+      gap: 15px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .top-nav nav ul li {
+      display: inline-block;
+    }
+
+    .top-nav nav ul li a {
+      text-decoration: none;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+
+    .top-nav nav ul li a:hover {
+      color: #f39c12;
+      transform: scale(1.1);
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 100px 20px 20px; /* 100px عشان الهيدر */
+    }
+
+    .card {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+      text-align: right;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-family: 'Tajawal', sans-serif;
+      display: block;
+      direction: rtl;
+    }
+
+    button {
+      background: linear-gradient(135deg, #4a0b72, #2f0e54);
+      color: white;
+      border: none;
+      padding: 10px;
+      width: 100%;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      font-family: 'Tajawal', sans-serif;
+    }
+
+    button:hover {
+      background: #f39c12;
+    }
+
+    .error {
+      color: red;
+      margin-top: 10px;
+      text-align: center;
+    }
+    p{
+      display: block;
+      direction: rtl;
+    }
+footer {  
+    text-align: center;  
+    padding: 20px;  
+    background-color: #4a0b72;
+    color: #ffffff;  
+}
+  </style>
+  
+</head>
+
+<body>
+  <header class="top-nav">
+    <img src="./src/assets/images/logo.png" alt="شعار">
+    <nav>
+      <ul>
+        <li><a href="contact.html"></i> تواصل معنا</a></li>
+        <li><a href="ProfessionalCertificates.html"></i> الشهادات الاحترافية</a></li>
+        <li><a href="Lectures.html"></i> المحاضرات</a></li>
+        <li><a href="camp.html"></i> المعسكرات</a></li>
+        <li><a href="about.html"></i> من نحن</a></li>
+        <li><a href="index.html"></i> الرئيسية</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="container">
+    <div class="card" id="app">
+      <h2 style="text-align:center;">إنشاء حساب جديد</h2>
+      <input type="name" v-model="name" placeholder="الاسم كامل" />
+      <input type="email" v-model="email" placeholder="البريد الإلكتروني" />
+      <input type="password" v-model="password" placeholder="كلمة المرور" />
+      <input type="password" v-model="confirmPassword" placeholder="تأكيد كلمة المرور" />
+      <p>اختر اهتماماتك:</p>
+<div style="display: flex; flex-wrap: wrap; gap: 10px; justify-self: start;">
+  <div style="width: 20%;">
+    <label><input type="checkbox" value="برمجة" v-model="selectedInterests" /> برمجة</label>
+  </div>
+  <div style="width: 20;">
+    <label><input type="checkbox" value="تصميم" v-model="interests" /> تصميم</label>
+  </div>
+  <div style="width: 20%;">
+    <label><input type="checkbox" value="ذكاء اصطناعي" v-model="interests" /> ذكاء اصطناعي</label>
+  </div>
+  <div style="width: 20%;">
+    <label><input type="checkbox" value="تحليل بيانات" v-model="interests" /> تحليل بيانات</label>
+  </div>
+  <div style="width: 10%;">
+    <label><input type="checkbox" value="أمن سيبراني" v-model="interests" /> أمن سيبراني</label>
+  </div>
+</div>
+<ul>  </ul>
+      <button @click="signup">إنشاء الحساب</button>
+      <div class="error" v-if="error">{{ error }}</div>
+    </div>
+  </div>
+  <footer>
+    <p>جميع الحقوق محفوظة © 2025 Tech-Inspire</p>
+</footer>
+</body>
+</html>  
